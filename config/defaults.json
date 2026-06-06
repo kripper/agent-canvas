@@ -24,7 +24,7 @@
   "ports": {
     "agentServer": 18000,
     "automation": 18001,
-    "proxy": 8000
+    "proxy": 8100
   },
 
   "paths": {
