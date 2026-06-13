@@ -1,4 +1,16 @@
 /**
+ * Check whether the active conversation has a gateway websocket URL from the
+ * OH backend. When present, HTTP/WebSocket calls should be routed through the
+ * app-server proxy instead of connecting directly to the agent-server sandbox.
+ */
+export function shouldUseGateway(
+  conversationUrl: string | null | undefined,
+  websocketUrl?: string | null,
+): boolean {
+  return !!websocketUrl;
+}
+
+/**
  * Extracts the base host from conversation URL
  * @param conversationUrl The conversation URL containing host/port (e.g., "http://localhost:3000/api/conversations/123")
  * @returns Base host (e.g., "localhost:3000") or window.location.host as fallback

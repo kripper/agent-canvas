@@ -7,6 +7,7 @@ import { pauseCloudSandbox } from "#/api/cloud/conversation-service.api";
 import { getAgentServerClientOptions } from "#/api/agent-server-client-options";
 import AgentServerConversationService from "#/api/conversation-service/agent-server-conversation-service.api";
 import { AppConversation } from "#/api/conversation-service/agent-server-conversation-service.types";
+import { shouldUseGateway } from "#/utils/websocket-url";
 
 type ExecutionStatusValue = AppConversation["execution_status"];
 
@@ -16,6 +17,7 @@ const fetchConversationData = async (
   conversationUrl: string | null;
   sessionApiKey: string | null;
   sandboxId: string | null;
+  websocketUrl?: string | null;
 }> => {
   const conversations =
     await AgentServerConversationService.batchGetAppConversations([
@@ -31,6 +33,7 @@ const fetchConversationData = async (
     conversationUrl: appConversation.conversation_url,
     sessionApiKey: appConversation.session_api_key,
     sandboxId: appConversation.sandbox_id,
+    websocketUrl: appConversation.websocket_url,
   };
 };
 
@@ -68,12 +71,12 @@ export const askAgent = async (
   conversationId: string,
   question: string,
 ): Promise<{ response: string }> => {
-  const { conversationUrl, sessionApiKey } =
+  const { conversationUrl, sessionApiKey, websocketUrl } =
     await fetchConversationData(conversationId);
 
-  // Cloud mode: route through the app-server proxy so the browser never
-  // connects directly to the sandbox agent-server.
-  if (getActiveBackend().backend.kind === "cloud") {
+  // Gateway mode: route through the app-server proxy so the browser
+  // never connects directly to the sandbox agent-server.
+  if (shouldUseGateway(conversationUrl, websocketUrl)) {
     return callCloudProxy<{ response: string }>({
       backend: getActiveBackend().backend,
       method: "POST",
