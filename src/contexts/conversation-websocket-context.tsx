@@ -116,6 +116,7 @@ export function ConversationWebSocketProvider({
   children,
   conversationId,
   conversationUrl,
+  gatewayWebsocketUrl,
   sessionApiKey,
   subConversations,
   subConversationIds,
@@ -123,6 +124,7 @@ export function ConversationWebSocketProvider({
   children: React.ReactNode;
   conversationId?: string;
   conversationUrl?: string | null;
+  gatewayWebsocketUrl?: string | null;
   sessionApiKey?: string | null;
   subConversations?: AppConversation[];
   subConversationIds?: string[];
@@ -330,17 +332,23 @@ export function ConversationWebSocketProvider({
   // fall through and connect with `resend_mode='all'` so the user still sees
   // live events.
   const wsUrl = useMemo(() => {
-    if (!conversationId || !conversationUrl) {
+    if (!conversationId) {
       return null;
     }
     if (isFetchingHistory && !isPreloadHistoryError) {
       return null;
     }
-    return buildWebSocketUrl(conversationId, conversationUrl);
+    return buildWebSocketUrl(
+      conversationId,
+      conversationUrl,
+      gatewayWebsocketUrl,
+    );
   }, [
     conversationId,
     conversationUrl,
     isFetchingHistory,
+    gatewayWebsocketUrl,
+    isPreloadingHistory,
     isPreloadHistoryError,
   ]);
 
@@ -362,6 +370,7 @@ export function ConversationWebSocketProvider({
     return buildWebSocketUrl(
       planningAgentConversation.id,
       planningAgentConversation.conversation_url,
+      planningAgentConversation.websocket_url,
     );
   }, [subConversations]);
 

@@ -107,17 +107,35 @@ export function buildBashWebSocketUrl(
 }
 
 /**
- * Builds the WebSocket URL for V1 conversations (without query params)
+ * Builds the WebSocket URL for V1 conversations (without query params).
+ *
  * @param conversationId The conversation ID
  * @param conversationUrl The conversation URL containing host/port (e.g., "http://localhost:3000/api/conversations/123")
+ * @param websocketUrl Optional gateway WebSocket URL (relative or absolute).
+ *   When present (e.g. from a cloud app_server that exposes /ws/events/{id}),
+ *   it is resolved against the current page origin and used directly instead
+ *   of deriving a URL from the internal conversation_url.
  * @returns WebSocket URL or null if inputs are invalid
  */
 export function buildWebSocketUrl(
   conversationId: string | undefined,
   conversationUrl: string | null | undefined,
+  websocketUrl?: string | null,
 ): string | null {
   if (!conversationId) {
     return null;
+  }
+
+  // Prefer the gateway websocket_url when provided — it already points at the
+  // public endpoint (e.g. /ws/events/{id}) that the browser can reach.
+  if (websocketUrl) {
+    try {
+      // Resolve relative path against current page origin
+      const resolved = new URL(websocketUrl, window.location.origin);
+      return resolved.toString();
+    } catch {
+      // Fall through to legacy derivation below
+    }
   }
 
   const baseHost = extractBaseHost(conversationUrl);
