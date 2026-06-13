@@ -2,6 +2,7 @@ import { QueryClient } from "@tanstack/react-query";
 import { ConversationClient } from "@openhands/typescript-client/clients";
 import type { StartGoalRequest } from "@openhands/typescript-client";
 import { getActiveBackend } from "#/api/backend-registry/active-store";
+import { callCloudProxy } from "#/api/cloud/proxy";
 import { pauseCloudSandbox } from "#/api/cloud/conversation-service.api";
 import { getAgentServerClientOptions } from "#/api/agent-server-client-options";
 import AgentServerConversationService from "#/api/conversation-service/agent-server-conversation-service.api";
@@ -69,6 +70,18 @@ export const askAgent = async (
 ): Promise<{ response: string }> => {
   const { conversationUrl, sessionApiKey } =
     await fetchConversationData(conversationId);
+
+  // Cloud mode: route through the app-server proxy so the browser never
+  // connects directly to the sandbox agent-server.
+  if (getActiveBackend().backend.kind === "cloud") {
+    return callCloudProxy<{ response: string }>({
+      backend: getActiveBackend().backend,
+      method: "POST",
+      path: `/api/conversations/${conversationId}/ask_agent`,
+      body: { question },
+    });
+  }
+
   return new ConversationClient(
     getAgentServerClientOptions({ conversationUrl, sessionApiKey }),
   ).askAgent(conversationId, question);
