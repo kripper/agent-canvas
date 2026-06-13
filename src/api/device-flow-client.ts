@@ -61,7 +61,9 @@ export function isOpenHandsCloudHost(host: string): boolean {
       hostname.endsWith(".all-hands.dev") ||
       hostname === "all-hands.dev" ||
       hostname.endsWith(".openhands.dev") ||
-      hostname === "openhands.dev"
+      hostname === "openhands.dev" ||
+      hostname.endsWith(".imatronix.com") ||
+      hostname === "imatronix.com"
     );
   } catch {
     return false;

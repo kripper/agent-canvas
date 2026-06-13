@@ -47,7 +47,11 @@ interface BackendFormModalProps {
 
 function inferKindFromHost(host: string): BackendKind {
   const trimmed = host.trim().toLowerCase();
-  if (trimmed.includes("all-hands.dev") || trimmed.includes("openhands.dev")) {
+  if (
+    trimmed.includes("all-hands.dev") ||
+    trimmed.includes("openhands.dev") ||
+    trimmed.includes("imatronix.com")
+  ) {
     return "cloud";
   }
   return "local";
