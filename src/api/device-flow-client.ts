@@ -43,28 +43,18 @@ const DEFAULT_TIMEOUT_MS = 600_000; // 10 minutes
 const MAX_INTERVAL_MS = 30_000; // 30 seconds max polling interval
 
 /**
- * Check if a host is a known OpenHands Cloud domain.
- * Uses hostname extraction to prevent substring matching attacks.
+ * Check if a host is a valid OpenHands Cloud backend domain.
+ * Accepts any valid URL hostname.
  */
 export function isOpenHandsCloudHost(host: string): boolean {
   try {
-    // Extract hostname from URL or treat as hostname if no protocol
-    const trimmed = host.trim().toLowerCase();
+    const trimmed = host.trim();
+    if (!trimmed) return false;
     const withProtocol = /^https?:\/\//i.test(trimmed)
       ? trimmed
       : `https://${trimmed}`;
     const url = new URL(withProtocol);
-    const hostname = url.hostname;
-
-    // Check if hostname ends with known domains (exact suffix match)
-    return (
-      hostname.endsWith(".all-hands.dev") ||
-      hostname === "all-hands.dev" ||
-      hostname.endsWith(".openhands.dev") ||
-      hostname === "openhands.dev" ||
-      hostname.endsWith(".imatronix.com") ||
-      hostname === "imatronix.com"
-    );
+    return !!url.hostname;
   } catch {
     return false;
   }
